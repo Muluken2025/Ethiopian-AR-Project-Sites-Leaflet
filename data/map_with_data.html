@@ -177,6 +177,12 @@
     <div class="selection-panels">
       <div class="nav-header" id="nav-header">Navigate to AR Sites</div>
       <div class="nav-content" id="nav-content">
+        <div class="panel" id="panel-region">
+          <label for="select-region">Choose AR Region</label>
+          <select id="select-region">
+            <option value="">--Select--</option>
+          </select>
+        </div>
         <div class="panel" id="panel-woreda">
           <label for="select-woreda">Choose AR District</label>
           <select id="select-woreda">
@@ -208,7 +214,6 @@
         <li id="download-shapefile">Lemo AR Shapefile</li>
         <li id="download-csv">Lemo AR CSV</li>
         <li id="download-metadata">Lemo AR Metadata</li>
-        <li id="download-map-html">Leaflet Map HTML</li>
       </ul>
     </div>
   </div>
@@ -230,44 +235,52 @@
   <script src="js/leaflet.js"></script>
   <script src="data/Lemo_AR_1.js"></script>
   <script>
-//////// Initialize Map
-var map = L.map('map', { zoomControl: true }).setView([7.5, 37.9], 10);
+    //////// Initialize Map
+    var map = L.map('map', { zoomControl: true }).setView([7.5, 37.9], 10);
 
-////////Add multiple basemaps- in the future, I will probably add the global forest cover or NDVI- depending on discsussion with the clients
-///// Define Multiple Basemaps with English Labels
-var googleSatellite = L.tileLayer('https://{s}.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}', {
-  subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
-  attribution: '&copy; Google Maps'
-});
+    //////// Add multiple basemaps
+       //////// Add multiple basemaps
+    var googleSatellite = L.tileLayer('https://{s}.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}', {
+      subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+      attribution: '&copy; Google Maps'
+    });
 
-var googleStreets = L.tileLayer('https://{s}.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}', {
-  subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
-  attribution: '&copy; Google Maps'
-});
+    var googleStreets = L.tileLayer('https://{s}.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}', {
+      subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+      attribution: '&copy; Google Maps'
+    });
 
-var openStreetMap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '&copy; OpenStreetMap contributors'
-});
+    var openStreetMap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    });
 
-/// Add Google Satellite as default base map
-googleSatellite.addTo(map);
+    // Add Global NDVI Base Map (NASA GIBS)
+    var globalNDVI = L.tileLayer('https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_NDVI_16Day/default/{time}/{tileMatrixSet}/{z}/{y}/{x}.jpg', {
+      tileMatrixSet: 'GoogleMapsCompatible_Level8',
+      time: '2023-10-01', // Update this to the latest available date
+      attribution: '&copy; NASA GIBS',
+      maxZoom: 8,
+      opacity: 0.7 // Adjust opacity as needed
+    });
 
-/// Create Layer Control for Base Maps
-var baseMaps = {
-  "Google Satellite": googleSatellite,
-  "Google Streets": googleStreets,
-  "OpenStreetMap": openStreetMap
-};
+    /// Add Google Satellite as default base map
+    googleSatellite.addTo(map);
 
-// Add Layer Control to Map
-L.control.layers(baseMaps).addTo(map);
+    /// Create Layer Control for Base Maps
+    var baseMaps = {
+      "Google Satellite": googleSatellite,
+      "Google Streets": googleStreets,
+      "OpenStreetMap": openStreetMap,
+      "Global NDVI": globalNDVI // Add NDVI to the base maps
+    };
 
-/////////
+    // Add Layer Control to Map
+    L.control.layers(baseMaps).addTo(map);
 
-    // Global variable to hold the highlighted layer (for selected feature)
+    //////// Global variable to hold the highlighted layer (for selected feature)
     var highlightedSiteLayer;
 
-    // Load GeoJSON Layer with popups bound to each polygon - this highlights the any selected sites or districts depending on our visualization inteterest
+    // Load GeoJSON Layer with popups bound to each polygon
     var geojsonLayer = L.geoJson(json_Lemo_AR_1, {
       onEachFeature: function (feature, layer) {
         if (feature.properties) {
@@ -282,7 +295,7 @@ L.control.layers(baseMaps).addTo(map);
       }
     }).addTo(map);
 
-    //// Toggle the download list visibility when the download header is clicked - this meanse the Display and Dowunload button should be clicked manually to initiate the request visulization or to download
+    //////// Toggle the download list visibility when the download header is clicked
     document.getElementById('download-header').addEventListener('click', function() {
       var downloadList = document.getElementById('download-list');
       if (downloadList.style.display === 'none' || downloadList.style.display === '') {
@@ -292,7 +305,7 @@ L.control.layers(baseMaps).addTo(map);
       }
     });
 
-    //// Handle download events from the download list
+    //////// Handle download events from the download list
     document.getElementById('download-shapefile').addEventListener('click', function() {
       var link = document.createElement('a');
       link.href = 'data/Lemo_AR.zip';
@@ -311,14 +324,8 @@ L.control.layers(baseMaps).addTo(map);
       link.download = 'Lemo_AR_Metadata.docx';
       link.click();
     });
-    document.getElementById('download-map-html').addEventListener('click', function() {
-      var link = document.createElement('a');
-      link.href = 'data/map_with_data.html';
-      link.download = 'map_with_data.html';
-      link.click();
-    });
 
-    /// Toggle the navigation panel content when the nav header is clicked
+    //////// Toggle the navigation panel content when the nav header is clicked
     document.getElementById('nav-header').addEventListener('click', function() {
       var navContent = document.getElementById('nav-content');
       if (navContent.style.display === 'none' || navContent.style.display === '') {
@@ -328,7 +335,7 @@ L.control.layers(baseMaps).addTo(map);
       }
     });
 
-    //// Toggle the contacts panel content when the contact header is clicked - the full information of the address will be visible upon clicking the contacts button
+    //////// Toggle the contacts panel content when the contact header is clicked
     document.getElementById('contact-header').addEventListener('click', function() {
       var contactContent = document.getElementById('contact-content');
       if (contactContent.style.display === 'none' || contactContent.style.display === '') {
@@ -338,12 +345,31 @@ L.control.layers(baseMaps).addTo(map);
       }
     });
 
-    // --- Functions for Dynamic Selections ---
-    function populateWoreda() {
+    //////// Functions for Dynamic Selections
+    function populateRegion() {
+      var selectRegion = document.getElementById('select-region');
+      selectRegion.innerHTML = '<option value="">--Select--</option>';
+      var regionSet = new Set();
+      json_Lemo_AR_1.features.forEach(function(feature) {
+        if (feature.properties.Region) {
+          regionSet.add(feature.properties.Region);
+        }
+      });
+      var regionList = Array.from(regionSet).sort();
+      regionList.forEach(function(region) {
+        var option = document.createElement('option');
+        option.value = region;
+        option.textContent = region;
+        selectRegion.appendChild(option);
+      });
+    }
+
+    function populateWoreda(selectedRegion) {
       var selectWoreda = document.getElementById('select-woreda');
       selectWoreda.innerHTML = '<option value="">--Select--</option>';
       var woredaSet = new Set();
       json_Lemo_AR_1.features.forEach(function(feature) {
+        if (selectedRegion && feature.properties.Region !== selectedRegion) return;
         if (feature.properties.Woreda) {
           woredaSet.add(feature.properties.Woreda);
         }
@@ -356,11 +382,13 @@ L.control.layers(baseMaps).addTo(map);
         selectWoreda.appendChild(option);
       });
     }
-    function populateKebele(selectedWoreda) {
+
+    function populateKebele(selectedRegion, selectedWoreda) {
       var selectKebele = document.getElementById('select-kebele');
       selectKebele.innerHTML = '<option value="">--Select--</option>';
       var kebeleSet = new Set();
       json_Lemo_AR_1.features.forEach(function(feature) {
+        if (selectedRegion && feature.properties.Region !== selectedRegion) return;
         if (selectedWoreda && feature.properties.Woreda !== selectedWoreda) return;
         if (feature.properties.Kebele) {
           kebeleSet.add(feature.properties.Kebele);
@@ -374,11 +402,13 @@ L.control.layers(baseMaps).addTo(map);
         selectKebele.appendChild(option);
       });
     }
-    function populateSite(selectedWoreda, selectedKebele) {
+
+    function populateSite(selectedRegion, selectedWoreda, selectedKebele) {
       var selectSite = document.getElementById('select-site');
       selectSite.innerHTML = '<option value="">--Select--</option>';
       var siteSet = new Set();
       json_Lemo_AR_1.features.forEach(function(feature) {
+        if (selectedRegion && feature.properties.Region !== selectedRegion) return;
         if (selectedWoreda && feature.properties.Woreda !== selectedWoreda) return;
         if (selectedKebele && feature.properties.Kebele !== selectedKebele) return;
         if (feature.properties.Site_Name) {
@@ -393,6 +423,7 @@ L.control.layers(baseMaps).addTo(map);
         selectSite.appendChild(option);
       });
     }
+
     function zoomToFiltered(filters) {
       var filteredFeatures = json_Lemo_AR_1.features.filter(function(feature) {
         for (var key in filters) {
@@ -410,26 +441,41 @@ L.control.layers(baseMaps).addTo(map);
         map.fitBounds(group.getBounds());
       }
     }
-    /// Initialize dropdowns
-    populateWoreda();
-    populateKebele('');
-    populateSite('', '');
-    document.getElementById('select-woreda').addEventListener('change', function() {
-      var selectedWoreda = this.value;
-      populateKebele(selectedWoreda);
-      populateSite(selectedWoreda, '');
+
+    //////// Initialize dropdowns
+    populateRegion();
+    populateWoreda('');
+    populateKebele('', '');
+    populateSite('', '', '');
+
+    document.getElementById('select-region').addEventListener('change', function() {
+      var selectedRegion = this.value;
+      populateWoreda(selectedRegion);
+      populateKebele(selectedRegion, '');
+      populateSite(selectedRegion, '', '');
     });
+
+    document.getElementById('select-woreda').addEventListener('change', function() {
+      var selectedRegion = document.getElementById('select-region').value;
+      var selectedWoreda = this.value;
+      populateKebele(selectedRegion, selectedWoreda);
+      populateSite(selectedRegion, selectedWoreda, '');
+    });
+
     document.getElementById('select-kebele').addEventListener('change', function() {
+      var selectedRegion = document.getElementById('select-region').value;
       var selectedWoreda = document.getElementById('select-woreda').value;
       var selectedKebele = this.value;
-      populateSite(selectedWoreda, selectedKebele);
+      populateSite(selectedRegion, selectedWoreda, selectedKebele);
     });
+
     document.getElementById('btn-display').addEventListener('click', function() {
+      var selectedRegion = document.getElementById('select-region').value;
       var selectedWoreda = document.getElementById('select-woreda').value;
       var selectedKebele = document.getElementById('select-kebele').value;
       var selectedSite = document.getElementById('select-site').value;
-      
-      ///// If a Site is selected, highlight with a red boundary.
+
+      //////// If a Site is selected, highlight with a red boundary.
       if (selectedSite) {
         if (highlightedSiteLayer) { map.removeLayer(highlightedSiteLayer); }
         var filteredFeatures = json_Lemo_AR_1.features.filter(function(feature) {
@@ -459,7 +505,7 @@ L.control.layers(baseMaps).addTo(map);
           map.fitBounds(highlightedSiteLayer.getBounds());
         }
       } 
-      //// Else if a Kebele is selected (but no Site), highlight with a yellow boundary
+      //////// Else if a Kebele is selected (but no Site), highlight with a yellow boundary
       else if (selectedKebele) {
         if (highlightedSiteLayer) { map.removeLayer(highlightedSiteLayer); }
         var filteredFeatures = json_Lemo_AR_1.features.filter(function(feature) {
@@ -489,7 +535,7 @@ L.control.layers(baseMaps).addTo(map);
           map.fitBounds(highlightedSiteLayer.getBounds());
         }
       } 
-      /// Else if only a Woreda is selected (and no Kebele), highlight with a green boundary.
+      //////// Else if only a Woreda is selected (and no Kebele), highlight with a green boundary.
       else if (selectedWoreda) {
         if (highlightedSiteLayer) { map.removeLayer(highlightedSiteLayer); }
         var filteredFeatures = json_Lemo_AR_1.features.filter(function(feature) {
@@ -519,9 +565,40 @@ L.control.layers(baseMaps).addTo(map);
           map.fitBounds(highlightedSiteLayer.getBounds());
         }
       } 
-      // Otherwise, if no specific selection, zoom to filtered features if any filters are applied.
+      //////// Else if only a Region is selected, highlight with a black boundary.
+      else if (selectedRegion) {
+        if (highlightedSiteLayer) { map.removeLayer(highlightedSiteLayer); }
+        var filteredFeatures = json_Lemo_AR_1.features.filter(function(feature) {
+          return feature.properties.Region === selectedRegion;
+        });
+        if (filteredFeatures.length > 0) {
+          var layers = filteredFeatures.map(function(feature) {
+            return L.geoJson(feature, {
+              style: function() {
+                return {
+                  color: 'black',    // Black boundary for Region
+                  weight: 4
+                };
+              },
+              onEachFeature: function(feature, layer) {
+                var popupContent = "<b>Attributes:</b><br>";
+                for (var key in feature.properties) {
+                  if (feature.properties.hasOwnProperty(key)) {
+                    popupContent += "<b>" + key + ":</b> " + feature.properties[key] + "<br>";
+                  }
+                }
+                layer.bindPopup(popupContent);
+              }
+            });
+          });
+          highlightedSiteLayer = L.featureGroup(layers).addTo(map);
+          map.fitBounds(highlightedSiteLayer.getBounds());
+        }
+      } 
+      //////// Otherwise, if no specific selection, zoom to filtered features if any filters are applied.
       else {
         var filters = {};
+        if (selectedRegion) { filters.Region = selectedRegion; }
         if (selectedWoreda) { filters.Woreda = selectedWoreda; }
         if (selectedKebele) { filters.Kebele = selectedKebele; }
         if (Object.keys(filters).length > 0) {
@@ -529,15 +606,21 @@ L.control.layers(baseMaps).addTo(map);
         }
       }
     });
+
     document.getElementById('btn-download').addEventListener('click', function() {
+      var selectedRegion = document.getElementById('select-region').value;
       var selectedWoreda = document.getElementById('select-woreda').value;
       var selectedKebele = document.getElementById('select-kebele').value;
       var selectedSite = document.getElementById('select-site').value;
       var filters = {};
       var filename = "all_features";
+      if (selectedRegion) {
+        filters.Region = selectedRegion;
+        filename = selectedRegion;
+      }
       if (selectedWoreda) {
         filters.Woreda = selectedWoreda;
-        filename = selectedWoreda;
+        filename += "_" + selectedWoreda;
       }
       if (selectedKebele) {
         filters.Kebele = selectedKebele;
