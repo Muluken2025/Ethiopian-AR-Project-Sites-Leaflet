@@ -1,309 +1,655 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
-    <title>Ethiopian Afforestation-Reforestation (AR) Project Sites</title>
-    <link rel="stylesheet" href="css/leaflet.css">
-    <style>
-        html, body, #map {
-            width: 100%;
-            height: 100%;
-            padding: 0;
-            margin: 0;
-            font-family: 'Arial', sans-serif;
-        }
-
-        .header {
-            background-color: #0078A8;
-            color: white;
-            padding: 15px 20px;
-            text-align: center;
-            font-size: 24px;
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .download-container {
-            position: absolute;
-            top: 70px;
-            left: 10px;
-            z-index: 1000;
-            background: white;
-            padding: 10px;
-            border-radius: 5px;
-            font-family: Arial, sans-serif;
-            font-size: 14px;
-            text-align: center;
-            box-shadow: 0px 0px 5px rgba(0,0,0,0.3);
-        }
-
-        .download-header {
-            cursor: pointer;
-            font-size: 16px;
-            background-color: #0078A8;
-            color: white;
-            padding: 10px;
-            text-align: center;
-            border-radius: 5px;
-        }
-
-        .download-list {
-            list-style-type: none;
-            padding: 0;
-            margin: 0;
-            display: none;
-        }
-
-        .download-list li {
-            margin: 5px 0;
-            cursor: pointer;
-            padding: 8px 10px;
-            background-color: #FFA500; /* Orange color */
-            color: white;
-            border-radius: 4px;
-            text-align: center;
-        }
-
-        .download-list li:hover {
-            background-color: #e68900; /* Darker orange on hover */
-        }
-
-        /* Adjusted the Select Site Names position to top-right */
-        .select-container {
-            position: absolute;
-            top: 70px; /* Space below the header */
-            right: 10px; /* Align to the right */
-            z-index: 1000;
-            background: white;
-            padding: 10px;
-            border-radius: 5px;
-            font-family: Arial, sans-serif;
-            font-size: 14px;
-            box-shadow: 0px 0px 5px rgba(0,0,0,0.3);
-        }
-
-        select {
-            font-size: 14px;
-            padding: 5px;
-            border-radius: 4px;
-            width: 200px;
-        }
-
-        select[multiple] {
-            height: 150px;
-        }
-
-        #map {
-            margin-top: 60px; /* Space for the header */
-        }
-    </style>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+  <title>Ethiopian Afforestation-Reforestation (AR) Project Sites</title>
+  <link rel="stylesheet" href="css/leaflet.css">
+  <style>
+    html, body, #map {
+      width: 100%;
+      height: 100%;
+      padding: 0;
+      margin: 0;
+      font-family: 'Arial', sans-serif;
+    }
+    .header {
+      background-color: #0078A8;
+      color: white;
+      padding: 15px 20px;
+      text-align: center;
+      font-size: 24px;
+      position: fixed;
+      width: 100%;
+      top: 0;
+      z-index: 1000;
+    }
+    /*Navigation & Download) */
+    .side-panel {
+      position: absolute;
+      top: 70px;
+      left: 10px;
+      width: 240px;
+      z-index: 1000;
+    }
+    /*Collapsible Navigation Panel */
+    .selection-panels {
+      background: white;
+      border-radius: 5px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.3);
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      width: 100%;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    .nav-header {
+      background-color: green;
+      color: white;
+      padding: 10px;
+      font-weight: bold;
+      cursor: pointer;
+      text-align: center;
+      border-bottom: 1px solid #ddd;
+    }
+    .nav-content {
+      display: none;
+      padding: 10px;
+    }
+    .nav-content .panel {
+      margin-bottom: 10px;
+    }
+    .nav-content label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    .nav-content select {
+      width: 100%;
+      padding: 5px;
+    }
+    .nav-content button {
+      width: 100%;
+      padding: 5px;
+      font-size: 14px;
+      cursor: pointer;
+      background-color: #add8e6; /* Light blue */
+      color: black;
+      border: none;
+      border-radius: 4px;
+      margin-bottom: 5px;
+    }
+    /* Download Container styling */
+    .download-container {
+      background: white;
+      border-radius: 5px;
+      box-shadow: 0px 0px 5px rgba(0,0,0,0.3);
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      text-align: center;
+      padding: 10px;
+    }
+    .download-header {
+      cursor: pointer;
+      font-size: 16px;
+      background-color: orange;
+      color: white;
+      padding: 10px;
+      text-align: center;
+      border-radius: 5px;
+      margin-bottom: 5px;
+    }
+    .download-list {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+      display: none;
+    }
+    .download-list li {
+      margin: 5px 0;
+      cursor: pointer;
+      padding: 8px 10px;
+      background-color: brown;
+      color: white;
+      border-radius: 4px;
+      text-align: center;
+    }
+    .download-list li:hover {
+      background-color: #e68900;
+    }
+    #map {
+      margin-top: 60px;
+    }
+    /* Contacts Panel styling */
+    .contact-container {
+      position: absolute;
+      bottom: 30px;  /* Adjust as needed for to appears below the side pan*/
+      right: 1px;
+      width: 230px;
+      z-index: 1000;
+      background: white;
+      border-radius: 5px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.3);
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+    .contact-header {
+      background-color: #0078A8;
+      color: white;
+      padding: 10px;
+      font-weight: bold;
+      cursor: pointer;
+      text-align: center;
+      border-bottom: 1px solid #ddd;
+      font-size: 18px;
+    }
+    .contact-content {
+      display: none;
+      padding: 10px;
+    }
+    .contact-content p {
+      margin: 5px 0;
+    }
+    /* Footer style - extended to full screen */
+    .footer {
+      background-color: #0078A8;
+      padding: 15px 20px;
+      text-align: center;
+      font-size: 24px;
+      position: fixed;
+      width: 100%;
+      left: 0;
+      bottom: 0;
+      z-index: 1000;
+    }
+  </style>
 </head>
 <body>
-    <div class="header">Ethiopian Afforestation-Reforestation (AR) Project Sites</div>
-
-    <div id="map"></div>
-
+  <div class="header">Ethiopian Afforestation-Reforestation (AR) Project Sites</div>
+  <div id="map"></div>
+  
+  <!-- Side Panel: Navigation & Download -->
+  <div class="side-panel">
+    <!-- Navigation Panel -->
+    <div class="selection-panels">
+      <div class="nav-header" id="nav-header">Navigate to AR Sites</div>
+      <div class="nav-content" id="nav-content">
+        <div class="panel" id="panel-region">
+          <label for="select-region">Choose AR Region</label>
+          <select id="select-region">
+            <option value="">--Select--</option>
+          </select>
+        </div>
+        <div class="panel" id="panel-woreda">
+          <label for="select-woreda">Choose AR District</label>
+          <select id="select-woreda">
+            <option value="">--Select--</option>
+          </select>
+        </div>
+        <div class="panel" id="panel-kebele">
+          <label for="select-kebele">Choose Kebele</label>
+          <select id="select-kebele">
+            <option value="">--Select--</option>
+          </select>
+        </div>
+        <div class="panel" id="panel-site">
+          <label for="select-site">Choose Site</label>
+          <select id="select-site">
+            <option value="">--Select--</option>
+          </select>
+        </div>
+        <div class="panel" id="panel-display">
+          <button id="btn-display">Display</button>
+          <button id="btn-download">Download</button>
+        </div>
+      </div>
+    </div>
     <!-- Download Section -->
     <div class="download-container">
-        <div class="download-header" id="download-header">Download AR Datasets (Ethiopia)</div>
-        <ul class="download-list" id="download-list">
-            <li id="download-shapefile">Lemo AR Shapefile</li>
-            <li id="download-csv">Lemo AR CSV</li>
-            <li id="download-metadata">Lemo AR Metadata</li>
-            <li id="download-map-html">Leaflet Map HTML</li>
-        </ul>
+      <div class="download-header" id="download-header">Download AR Datasets</div>
+      <ul class="download-list" id="download-list">
+        <li id="download-shapefile">Lemo AR Shapefile</li>
+        <li id="download-csv">Lemo AR CSV</li>
+        <li id="download-metadata">Lemo AR Metadata</li>
+      </ul>
     </div>
-
-    <!-- Site Name Selection (Multiple Selection) -->
-    <div class="select-container">
-        <label for="site-name-select">Select Site Names:</label>
-        <select id="site-name-select" multiple>
-            <option value="">--Select--</option>
-        </select>
-        <button id="download-selected">Download Selected Shapefile</button>
-        <button id="download-area-csv">Download Selected Area CSV</button>
+  </div>
+  
+  <!-- Contacts Panel remains unchanged -->
+  <div class="contact-container">
+    <div class="contact-header" id="contact-header">Contacts</div>
+    <div class="contact-content" id="contact-content">
+      <p>Organization Name: XXXXXXX</p>
+      <p>Address: 0000---, City, Country</p>
+      <p>Phone: 000--0000-000</p>
+      <p>Email: aaaaa@eaaaaa.com</p>
     </div>
+  </div>
+  
+  <!-- Footer extended to full screen (no text) -->
+  <div class="footer"></div>
+  
+  <script src="js/leaflet.js"></script>
+  <script src="data/Lemo_AR_1.js"></script>
+  <script>
+    //////// Initialize Map
+    var map = L.map('map', { zoomControl: true }).setView([7.5, 37.9], 10);
 
-    <script src="js/leaflet.js"></script>
-    <script src="data/Lemo_AR_1.js"></script>
-    <script>
-        //////// Initialize Map
-        var map = L.map('map', { zoomControl: true }).setView([7.5, 37.9], 10);
+    //////// Add multiple basemaps
+       //////// Add multiple basemaps
+    var googleSatellite = L.tileLayer('https://{s}.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}', {
+      subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+      attribution: '&copy; Google Maps'
+    });
 
-        //////// Google Satellite as a Basemap
-        L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
-            subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
-            attribution: '&copy; Google Maps'
-        }).addTo(map);
+    var googleStreets = L.tileLayer('https://{s}.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}', {
+      subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+      attribution: '&copy; Google Maps'
+    });
 
-        var geojsonLayer;
-        var selectedSitesLayer = L.layerGroup().addTo(map);  // Layer to hold selected site highlights
+    var openStreetMap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    });
 
-        //////// Select by Site Name dropdown 
-        function populateSiteNameSelect(features) {
-            var siteSelect = document.getElementById('site-name-select');
-            // Sort features alphabetically by Site_Name
-            features.sort(function(a, b) {
-                var siteNameA = a.properties.Site_Name.toLowerCase();
-                var siteNameB = b.properties.Site_Name.toLowerCase();
-                if (siteNameA < siteNameB) {
-                    return -1;
-                }
-                if (siteNameA > siteNameB) {
-                    return 1;
-                }
-                return 0;
-            });
+    // Add Global NDVI Base Map (NASA GIBS)
+    var globalNDVI = L.tileLayer('https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_NDVI_16Day/default/{time}/{tileMatrixSet}/{z}/{y}/{x}.jpg', {
+      tileMatrixSet: 'GoogleMapsCompatible_Level8',
+      time: '2023-10-01', // Update this to the latest available date
+      attribution: '&copy; NASA GIBS',
+      maxZoom: 8,
+      opacity: 0.7 // Adjust opacity as needed
+    });
 
-            features.forEach(function(feature) {
-                var option = document.createElement('option');
-                option.value = feature.properties.Site_Name;
-                option.textContent = feature.properties.Site_Name;
-                siteSelect.appendChild(option);
-            });
+    /// Add Google Satellite as default base map
+    googleSatellite.addTo(map);
+
+    /// Create Layer Control for Base Maps
+    var baseMaps = {
+      "Google Satellite": googleSatellite,
+      "Google Streets": googleStreets,
+      "OpenStreetMap": openStreetMap,
+      "Global NDVI": globalNDVI // Add NDVI to the base maps
+    };
+
+    // Add Layer Control to Map
+    L.control.layers(baseMaps).addTo(map);
+
+    //////// Global variable to hold the highlighted layer (for selected feature)
+    var highlightedSiteLayer;
+
+    // Load GeoJSON Layer with popups bound to each polygon
+    var geojsonLayer = L.geoJson(json_Lemo_AR_1, {
+      onEachFeature: function (feature, layer) {
+        if (feature.properties) {
+          var popupContent = "<b>Attributes:</b><br>";
+          for (var key in feature.properties) {
+            if (feature.properties.hasOwnProperty(key)) {
+              popupContent += "<b>" + key + ":</b> " + feature.properties[key] + "<br>";
+            }
+          }
+          layer.bindPopup(popupContent);
         }
+      }
+    }).addTo(map);
 
-        //////// Load GeoJSON Layer
-        geojsonLayer = L.geoJson(json_Lemo_AR_1, {
-            onEachFeature: function (feature, layer) {
-                if (feature.properties) {
-                    //////// Create a string to store all attributes
-                    var popupContent = "<b>Attributes:</b><br>";
-                    for (var key in feature.properties) {
-                        if (feature.properties.hasOwnProperty(key)) {
-                            popupContent += "<b>" + key + ":</b> " + feature.properties[key] + "<br>";
-                        }
-                    }
-                    //////// Bind the popup with all attributes
-                    layer.bindPopup(popupContent);
-                }
-            }
-        }).addTo(map);
+    //////// Toggle the download list visibility when the download header is clicked
+    document.getElementById('download-header').addEventListener('click', function() {
+      var downloadList = document.getElementById('download-list');
+      if (downloadList.style.display === 'none' || downloadList.style.display === '') {
+        downloadList.style.display = 'block';
+      } else {
+        downloadList.style.display = 'none';
+      }
+    });
 
-        //////// Populate the Site Name dropdown
-        populateSiteNameSelect(json_Lemo_AR_1.features);
+    //////// Handle download events from the download list
+    document.getElementById('download-shapefile').addEventListener('click', function() {
+      var link = document.createElement('a');
+      link.href = 'data/Lemo_AR.zip';
+      link.download = 'Lemo_AR.zip';
+      link.click();
+    });
+    document.getElementById('download-csv').addEventListener('click', function() {
+      var link = document.createElement('a');
+      link.href = 'data/Lemo_AR.csv';
+      link.download = 'Lemo_AR.csv';
+      link.click();
+    });
+    document.getElementById('download-metadata').addEventListener('click', function() {
+      var link = document.createElement('a');
+      link.href = 'data/Lemo_AR_Metadata.docx';
+      link.download = 'Lemo_AR_Metadata.docx';
+      link.click();
+    });
 
-        // Function to highlight selected sites on the map
-        function highlightSelectedSites(selectedSites) {
-            selectedSitesLayer.clearLayers(); // Clear previous highlights
-            selectedSites.forEach(function(siteName) {
-                var selectedFeature = json_Lemo_AR_1.features.find(function(feature) {
-                    return feature.properties.Site_Name === siteName;
-                });
+    //////// Toggle the navigation panel content when the nav header is clicked
+    document.getElementById('nav-header').addEventListener('click', function() {
+      var navContent = document.getElementById('nav-content');
+      if (navContent.style.display === 'none' || navContent.style.display === '') {
+        navContent.style.display = 'block';
+      } else {
+        navContent.style.display = 'none';
+      }
+    });
 
-                if (selectedFeature) {
-                    //////// Create a polygon layer for the selected feature with a specific color
-                    var siteLayer = L.geoJson(selectedFeature, {
-                        style: function() {
-                            return {
-                                color: 'green', // Color of selected sites
-                                weight: 3,
-                                opacity: 1,
-                                fillColor: 'lightgreen',
-                                fillOpacity: 0.5
-                            };
-                        }
-                    }).addTo(selectedSitesLayer);
+    //////// Toggle the contacts panel content when the contact header is clicked
+    document.getElementById('contact-header').addEventListener('click', function() {
+      var contactContent = document.getElementById('contact-content');
+      if (contactContent.style.display === 'none' || contactContent.style.display === '') {
+        contactContent.style.display = 'block';
+      } else {
+        contactContent.style.display = 'none';
+      }
+    });
 
-                    //////// Center the map on the selected site - Navidate to the site
-                    var bounds = siteLayer.getBounds();
-                    map.fitBounds(bounds);
-                }
-            });
+    //////// Functions for Dynamic Selections
+    function populateRegion() {
+      var selectRegion = document.getElementById('select-region');
+      selectRegion.innerHTML = '<option value="">--Select--</option>';
+      var regionSet = new Set();
+      json_Lemo_AR_1.features.forEach(function(feature) {
+        if (feature.properties.Region) {
+          regionSet.add(feature.properties.Region);
         }
+      });
+      var regionList = Array.from(regionSet).sort();
+      regionList.forEach(function(region) {
+        var option = document.createElement('option');
+        option.value = region;
+        option.textContent = region;
+        selectRegion.appendChild(option);
+      });
+    }
 
-        //////// For selection changes in the dropdown and update the map
-        document.getElementById('site-name-select').addEventListener('change', function() {
-            var selectedSites = Array.from(this.selectedOptions).map(option => option.value);
-            if (selectedSites.length > 0) {
-                highlightSelectedSites(selectedSites);
-            }
+    function populateWoreda(selectedRegion) {
+      var selectWoreda = document.getElementById('select-woreda');
+      selectWoreda.innerHTML = '<option value="">--Select--</option>';
+      var woredaSet = new Set();
+      json_Lemo_AR_1.features.forEach(function(feature) {
+        if (selectedRegion && feature.properties.Region !== selectedRegion) return;
+        if (feature.properties.Woreda) {
+          woredaSet.add(feature.properties.Woreda);
+        }
+      });
+      var woredaList = Array.from(woredaSet).sort();
+      woredaList.forEach(function(woreda) {
+        var option = document.createElement('option');
+        option.value = woreda;
+        option.textContent = woreda;
+        selectWoreda.appendChild(option);
+      });
+    }
+
+    function populateKebele(selectedRegion, selectedWoreda) {
+      var selectKebele = document.getElementById('select-kebele');
+      selectKebele.innerHTML = '<option value="">--Select--</option>';
+      var kebeleSet = new Set();
+      json_Lemo_AR_1.features.forEach(function(feature) {
+        if (selectedRegion && feature.properties.Region !== selectedRegion) return;
+        if (selectedWoreda && feature.properties.Woreda !== selectedWoreda) return;
+        if (feature.properties.Kebele) {
+          kebeleSet.add(feature.properties.Kebele);
+        }
+      });
+      var kebeleList = Array.from(kebeleSet).sort();
+      kebeleList.forEach(function(kebele) {
+        var option = document.createElement('option');
+        option.value = kebele;
+        option.textContent = kebele;
+        selectKebele.appendChild(option);
+      });
+    }
+
+    function populateSite(selectedRegion, selectedWoreda, selectedKebele) {
+      var selectSite = document.getElementById('select-site');
+      selectSite.innerHTML = '<option value="">--Select--</option>';
+      var siteSet = new Set();
+      json_Lemo_AR_1.features.forEach(function(feature) {
+        if (selectedRegion && feature.properties.Region !== selectedRegion) return;
+        if (selectedWoreda && feature.properties.Woreda !== selectedWoreda) return;
+        if (selectedKebele && feature.properties.Kebele !== selectedKebele) return;
+        if (feature.properties.Site_Name) {
+          siteSet.add(feature.properties.Site_Name);
+        }
+      });
+      var siteList = Array.from(siteSet).sort();
+      siteList.forEach(function(site) {
+        var option = document.createElement('option');
+        option.value = site;
+        option.textContent = site;
+        selectSite.appendChild(option);
+      });
+    }
+
+    function zoomToFiltered(filters) {
+      var filteredFeatures = json_Lemo_AR_1.features.filter(function(feature) {
+        for (var key in filters) {
+          if (filters[key] && feature.properties[key] !== filters[key]) {
+            return false;
+          }
+        }
+        return true;
+      });
+      if (filteredFeatures.length > 0) {
+        var layers = filteredFeatures.map(function(feature) {
+          return L.geoJson(feature);
         });
+        var group = L.featureGroup(layers);
+        map.fitBounds(group.getBounds());
+      }
+    }
 
-        //////// Toggle the download list visibility when the header is clicked
-        document.getElementById('download-header').addEventListener('click', function() {
-            var downloadList = document.getElementById('download-list');
-            if (downloadList.style.display === 'none' || downloadList.style.display === '') {
-                downloadList.style.display = 'block';
-            } else {
-                downloadList.style.display = 'none';
-            }
+    //////// Initialize dropdowns
+    populateRegion();
+    populateWoreda('');
+    populateKebele('', '');
+    populateSite('', '', '');
+
+    document.getElementById('select-region').addEventListener('change', function() {
+      var selectedRegion = this.value;
+      populateWoreda(selectedRegion);
+      populateKebele(selectedRegion, '');
+      populateSite(selectedRegion, '', '');
+    });
+
+    document.getElementById('select-woreda').addEventListener('change', function() {
+      var selectedRegion = document.getElementById('select-region').value;
+      var selectedWoreda = this.value;
+      populateKebele(selectedRegion, selectedWoreda);
+      populateSite(selectedRegion, selectedWoreda, '');
+    });
+
+    document.getElementById('select-kebele').addEventListener('change', function() {
+      var selectedRegion = document.getElementById('select-region').value;
+      var selectedWoreda = document.getElementById('select-woreda').value;
+      var selectedKebele = this.value;
+      populateSite(selectedRegion, selectedWoreda, selectedKebele);
+    });
+
+    document.getElementById('btn-display').addEventListener('click', function() {
+      var selectedRegion = document.getElementById('select-region').value;
+      var selectedWoreda = document.getElementById('select-woreda').value;
+      var selectedKebele = document.getElementById('select-kebele').value;
+      var selectedSite = document.getElementById('select-site').value;
+
+      //////// If a Site is selected, highlight with a red boundary.
+      if (selectedSite) {
+        if (highlightedSiteLayer) { map.removeLayer(highlightedSiteLayer); }
+        var filteredFeatures = json_Lemo_AR_1.features.filter(function(feature) {
+          return feature.properties.Site_Name === selectedSite;
         });
-
-        //////// Handle download events from the download list
-        document.getElementById('download-shapefile').addEventListener('click', function() {
-            var link = document.createElement('a');
-            link.href = 'data/Lemo_AR.zip';
-            link.download = 'Lemo_AR.zip';
-            link.click();
-        });
-
-        document.getElementById('download-csv').addEventListener('click', function() {
-            var link = document.createElement('a');
-            link.href = 'data/Lemo_AR.csv';
-            link.download = 'Lemo_AR.csv';
-            link.click();
-        });
-
-        document.getElementById('download-metadata').addEventListener('click', function() {
-            var link = document.createElement('a');
-            link.href = 'data/Lemo_AR_Metadata.docx';
-            link.download = 'Lemo_AR_Metadata.docx';
-            link.click();
-        });
-
-        document.getElementById('download-map-html').addEventListener('click', function() {
-            var link = document.createElement('a');
-            link.href = 'data/map_with_data.html';
-            link.download = 'map_with_data.html';
-            link.click();
-        });
-
-        //////// Download selected shapefile by Site Name(s) - Possible for multipe selection
-        document.getElementById('download-selected').addEventListener('click', function() {
-            var selectedSites = Array.from(document.getElementById('site-name-select').selectedOptions).map(option => option.value);
-            if (selectedSites.length > 0) {
-                var filteredGeoJson = {
-                    type: "FeatureCollection",
-                    features: json_Lemo_AR_1.features.filter(function(feature) {
-                        return selectedSites.includes(feature.properties.Site_Name);
-                    })
+        if (filteredFeatures.length > 0) {
+          var layers = filteredFeatures.map(function(feature) {
+            return L.geoJson(feature, {
+              style: function() {
+                return {
+                  color: 'red',      // Red boundary for Site
+                  weight: 4
                 };
-
-                var blob = new Blob([JSON.stringify(filteredGeoJson)], { type: "application/json" });
-                var link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = selectedSites.join('_') + "_shapefile.json";
-                link.click();
-            } else {
-                alert('Please select at least one Site Name');
-            }
+              },
+              onEachFeature: function(feature, layer) {
+                var popupContent = "<b>Attributes:</b><br>";
+                for (var key in feature.properties) {
+                  if (feature.properties.hasOwnProperty(key)) {
+                    popupContent += "<b>" + key + ":</b> " + feature.properties[key] + "<br>";
+                  }
+                }
+                layer.bindPopup(popupContent);
+              }
+            });
+          });
+          highlightedSiteLayer = L.featureGroup(layers).addTo(map);
+          map.fitBounds(highlightedSiteLayer.getBounds());
+        }
+      } 
+      //////// Else if a Kebele is selected (but no Site), highlight with a yellow boundary
+      else if (selectedKebele) {
+        if (highlightedSiteLayer) { map.removeLayer(highlightedSiteLayer); }
+        var filteredFeatures = json_Lemo_AR_1.features.filter(function(feature) {
+          return feature.properties.Kebele === selectedKebele;
         });
-
-        //////// Download Area CSV for selected Site Names - possible for multiple selection
-        document.getElementById('download-area-csv').addEventListener('click', function() {
-            var selectedSites = Array.from(document.getElementById('site-name-select').selectedOptions).map(option => option.value);
-            if (selectedSites.length > 0) {
-                var csvContent = "Site Name,Area (m²)\n";
-                json_Lemo_AR_1.features.forEach(function(feature) {
-                    if (selectedSites.includes(feature.properties.Site_Name)) {
-                        csvContent += feature.properties.Site_Name + "," + feature.properties.Area + "\n";
-                    }
-                });
-
-                var blob = new Blob([csvContent], { type: "text/csv" });
-                var link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = selectedSites.join('_') + "_area_data.csv";
-                link.click();
-            } else {
-                alert('Please select at least one Site Name');
-            }
+        if (filteredFeatures.length > 0) {
+          var layers = filteredFeatures.map(function(feature) {
+            return L.geoJson(feature, {
+              style: function() {
+                return {
+                  color: 'yellow',   ////// Yellow boundary for Kebele
+                  weight: 4
+                };
+              },
+              onEachFeature: function(feature, layer) {
+                var popupContent = "<b>Attributes:</b><br>";
+                for (var key in feature.properties) {
+                  if (feature.properties.hasOwnProperty(key)) {
+                    popupContent += "<b>" + key + ":</b> " + feature.properties[key] + "<br>";
+                  }
+                }
+                layer.bindPopup(popupContent);
+              }
+            });
+          });
+          highlightedSiteLayer = L.featureGroup(layers).addTo(map);
+          map.fitBounds(highlightedSiteLayer.getBounds());
+        }
+      } 
+      //////// Else if only a Woreda is selected (and no Kebele), highlight with a green boundary.
+      else if (selectedWoreda) {
+        if (highlightedSiteLayer) { map.removeLayer(highlightedSiteLayer); }
+        var filteredFeatures = json_Lemo_AR_1.features.filter(function(feature) {
+          return feature.properties.Woreda === selectedWoreda;
         });
-    </script>
+        if (filteredFeatures.length > 0) {
+          var layers = filteredFeatures.map(function(feature) {
+            return L.geoJson(feature, {
+              style: function() {
+                return {
+                  color: 'green',    // Green boundary for Woreda
+                  weight: 4
+                };
+              },
+              onEachFeature: function(feature, layer) {
+                var popupContent = "<b>Attributes:</b><br>";
+                for (var key in feature.properties) {
+                  if (feature.properties.hasOwnProperty(key)) {
+                    popupContent += "<b>" + key + ":</b> " + feature.properties[key] + "<br>";
+                  }
+                }
+                layer.bindPopup(popupContent);
+              }
+            });
+          });
+          highlightedSiteLayer = L.featureGroup(layers).addTo(map);
+          map.fitBounds(highlightedSiteLayer.getBounds());
+        }
+      } 
+      //////// Else if only a Region is selected, highlight with a black boundary.
+      else if (selectedRegion) {
+        if (highlightedSiteLayer) { map.removeLayer(highlightedSiteLayer); }
+        var filteredFeatures = json_Lemo_AR_1.features.filter(function(feature) {
+          return feature.properties.Region === selectedRegion;
+        });
+        if (filteredFeatures.length > 0) {
+          var layers = filteredFeatures.map(function(feature) {
+            return L.geoJson(feature, {
+              style: function() {
+                return {
+                  color: 'black',    // Black boundary for Region
+                  weight: 4
+                };
+              },
+              onEachFeature: function(feature, layer) {
+                var popupContent = "<b>Attributes:</b><br>";
+                for (var key in feature.properties) {
+                  if (feature.properties.hasOwnProperty(key)) {
+                    popupContent += "<b>" + key + ":</b> " + feature.properties[key] + "<br>";
+                  }
+                }
+                layer.bindPopup(popupContent);
+              }
+            });
+          });
+          highlightedSiteLayer = L.featureGroup(layers).addTo(map);
+          map.fitBounds(highlightedSiteLayer.getBounds());
+        }
+      } 
+      //////// Otherwise, if no specific selection, zoom to filtered features if any filters are applied.
+      else {
+        var filters = {};
+        if (selectedRegion) { filters.Region = selectedRegion; }
+        if (selectedWoreda) { filters.Woreda = selectedWoreda; }
+        if (selectedKebele) { filters.Kebele = selectedKebele; }
+        if (Object.keys(filters).length > 0) {
+          zoomToFiltered(filters);
+        }
+      }
+    });
+
+    document.getElementById('btn-download').addEventListener('click', function() {
+      var selectedRegion = document.getElementById('select-region').value;
+      var selectedWoreda = document.getElementById('select-woreda').value;
+      var selectedKebele = document.getElementById('select-kebele').value;
+      var selectedSite = document.getElementById('select-site').value;
+      var filters = {};
+      var filename = "all_features";
+      if (selectedRegion) {
+        filters.Region = selectedRegion;
+        filename = selectedRegion;
+      }
+      if (selectedWoreda) {
+        filters.Woreda = selectedWoreda;
+        filename += "_" + selectedWoreda;
+      }
+      if (selectedKebele) {
+        filters.Kebele = selectedKebele;
+        filename += "_" + selectedKebele;
+      }
+      if (selectedSite) {
+        filters.Site_Name = selectedSite;
+        filename += "_" + selectedSite;
+      }
+      var filteredFeatures = json_Lemo_AR_1.features.filter(function(feature) {
+        for (var key in filters) {
+          if (filters[key] && feature.properties[key] !== filters[key]) {
+            return false;
+          }
+        }
+        return true;
+      });
+      var geojson = {
+        type: "FeatureCollection",
+        features: filteredFeatures
+      };
+      var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(geojson));
+      var downloadAnchorNode = document.createElement('a');
+      downloadAnchorNode.setAttribute("href", dataStr);
+      downloadAnchorNode.setAttribute("download", filename + ".geojson");
+      document.body.appendChild(downloadAnchorNode);
+      downloadAnchorNode.click();
+      downloadAnchorNode.remove();
+    });
+  </script>
 </body>
 </html>
