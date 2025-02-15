@@ -19,28 +19,32 @@
       color: white;
       padding: 15px 20px;
       text-align: center;
-      font-size: 24px;
+      font-size: 25px;
+      font-weight: bold;
       position: fixed;
       width: 100%;
       top: 0;
       z-index: 1000;
     }
-    /*Navigation & Download) */
+    /* Position the Navigation & Download panels together side by side */
     .side-panel {
-      position: absolute;
-      top: 70px;
-      left: 10px;
-      width: 240px;
+      position: fixed;
+      top: 60px; /* adjusted to exactly so that it touches the header or title background */
+      left: 0;  /* 0 meanse, just following the screen edge */
+      display: flex;
+      flex-direction: row;
+      gap: 0;  /* removed gap so panels share the same border line-meanse no space in between the panels */
+      align-items: flex-start; /* Ensure panels have independent heights */
       z-index: 1000;
     }
-    /*Collapsible Navigation Panel */
+    /* Fix the widths so each panel appears properly */
     .selection-panels {
       background: white;
       border-radius: 5px;
       box-shadow: 0 0 5px rgba(0,0,0,0.3);
       font-family: Arial, sans-serif;
       font-size: 14px;
-      width: 100%;
+      width: 240px;
       overflow: hidden;
       margin-bottom: 10px;
     }
@@ -52,6 +56,7 @@
       cursor: pointer;
       text-align: center;
       border-bottom: 1px solid #ddd;
+      font-size: 16px; /* Adjusted to match Download AR Datasets-same font sizee */
     }
     .nav-content {
       display: none;
@@ -74,7 +79,7 @@
       padding: 5px;
       font-size: 14px;
       cursor: pointer;
-      background-color: #add8e6; /* Light blue */
+      background-color: #add8e6; /* Light blue-possible to chang */
       color: black;
       border: none;
       border-radius: 4px;
@@ -84,21 +89,22 @@
     .download-container {
       background: white;
       border-radius: 5px;
-      box-shadow: 0px 0px 5px rgba(0,0,0,0.3);
+      box-shadow: 0 0 5px rgba(0,0,0,0.3);
       font-family: Arial, sans-serif;
       font-size: 14px;
       text-align: center;
-      padding: 10px;
+      width: 240px;
+      /* Removed padding so the background matches exactly the header extent */
     }
     .download-header {
       cursor: pointer;
-      font-size: 16px;
       background-color: orange;
       color: white;
       padding: 10px;
+      font-weight: bold;
       text-align: center;
-      border-radius: 5px;
-      margin-bottom: 5px;
+      border-bottom: 1px solid #ddd;
+      font-size: 16px; /* Adjusted to match Navigate to AR Sites -same font size */  
     }
     .download-list {
       list-style-type: none;
@@ -123,8 +129,8 @@
     }
     /* Contacts Panel styling */
     .contact-container {
-      position: absolute;
-      bottom: 30px;  /* Adjust as needed for to appears below the side pan*/
+      position: fixed;
+      bottom: 30px;
       right: 1px;
       width: 230px;
       z-index: 1000;
@@ -165,13 +171,27 @@
       bottom: 0;
       z-index: 1000;
     }
+    /* Fix the Leaflet controls (zoom and layers control) so they remain static - on scrolling of the screen */
+    .leaflet-control-zoom,
+    .leaflet-control-layers {
+      position: fixed !important;
+      z-index: 1100;
+    }
+    .leaflet-control-zoom {
+      top: 140px !important;
+      right: 10px !important;
+    }
+    .leaflet-control-layers {
+      top: 70px !important;
+      right: 10px !important;
+    }
   </style>
 </head>
 <body>
   <div class="header">Ethiopian Afforestation-Reforestation (AR) Project Sites</div>
   <div id="map"></div>
   
-  <!-- Side Panel: Navigation & Download -->
+  <!-- Side Panel: Navigation & Download (side by side) -->
   <div class="side-panel">
     <!-- Navigation Panel -->
     <div class="selection-panels">
@@ -218,7 +238,7 @@
     </div>
   </div>
   
-  <!-- Contacts Panel remains unchanged -->
+  <!-- Contacts Panel -->
   <div class="contact-container">
     <div class="contact-header" id="contact-header">Contacts</div>
     <div class="contact-content" id="contact-content">
@@ -229,7 +249,7 @@
     </div>
   </div>
   
-  <!-- Footer extended to full screen (no text) -->
+  <!-- Footer -->
   <div class="footer"></div>
   
   <script src="js/leaflet.js"></script>
@@ -238,8 +258,7 @@
     //////// Initialize Map
     var map = L.map('map', { zoomControl: true }).setView([7.5, 37.9], 10);
 
-    //////// Add multiple basemaps
-       //////// Add multiple basemaps
+    ///////////// Add multiple basemaps - 
     var googleSatellite = L.tileLayer('https://{s}.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}', {
       subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
       attribution: '&copy; Google Maps'
@@ -263,10 +282,10 @@
       opacity: 0.7 // Adjust opacity as needed
     });
 
-    /// Add Google Satellite as default base map
+    ////// Add Google Satellite as default base map
     googleSatellite.addTo(map);
 
-    /// Create Layer Control for Base Maps
+    /////////// Create Layer Control for Base Maps
     var baseMaps = {
       "Google Satellite": googleSatellite,
       "Google Streets": googleStreets,
@@ -274,10 +293,10 @@
       "Global NDVI": globalNDVI // Add NDVI to the base maps
     };
 
-    // Add Layer Control to Map
+    //////// Add Layer Control to Map
     L.control.layers(baseMaps).addTo(map);
 
-    //////// Global variable to hold the highlighted layer (for selected feature)
+    ////////// Global variable to hold the highlighted layer (for selected feature)
     var highlightedSiteLayer;
 
     // Load GeoJSON Layer with popups bound to each polygon
@@ -295,7 +314,7 @@
       }
     }).addTo(map);
 
-    //////// Toggle the download list visibility when the download header is clicked
+    /////////// Toggle the download list visibility when the download header is clicked
     document.getElementById('download-header').addEventListener('click', function() {
       var downloadList = document.getElementById('download-list');
       if (downloadList.style.display === 'none' || downloadList.style.display === '') {
@@ -305,7 +324,7 @@
       }
     });
 
-    //////// Handle download events from the download list
+    //////////// Handle download events from the download list
     document.getElementById('download-shapefile').addEventListener('click', function() {
       var link = document.createElement('a');
       link.href = 'data/Lemo_AR.zip';
@@ -325,7 +344,7 @@
       link.click();
     });
 
-    //////// Toggle the navigation panel content when the nav header is clicked
+    ///// Toggle the navigation panel content when the navig header is clicked
     document.getElementById('nav-header').addEventListener('click', function() {
       var navContent = document.getElementById('nav-content');
       if (navContent.style.display === 'none' || navContent.style.display === '') {
@@ -335,7 +354,7 @@
       }
     });
 
-    //////// Toggle the contacts panel content when the contact header is clicked
+    /// Toggle the contacts panel content when the contact header is clicked
     document.getElementById('contact-header').addEventListener('click', function() {
       var contactContent = document.getElementById('contact-content');
       if (contactContent.style.display === 'none' || contactContent.style.display === '') {
@@ -345,7 +364,7 @@
       }
     });
 
-    //////// Functions for Dynamic Selections
+    ////// Functions for Dynamic Selections
     function populateRegion() {
       var selectRegion = document.getElementById('select-region');
       selectRegion.innerHTML = '<option value="">--Select--</option>';
@@ -442,7 +461,7 @@
       }
     }
 
-    //////// Initialize dropdowns
+    /////////////////// Initialize dropdowns
     populateRegion();
     populateWoreda('');
     populateKebele('', '');
@@ -475,7 +494,7 @@
       var selectedKebele = document.getElementById('select-kebele').value;
       var selectedSite = document.getElementById('select-site').value;
 
-      //////// If a Site is selected, highlight with a red boundary.
+      ////////// If a Site is selected, highlight with a red boundary.
       if (selectedSite) {
         if (highlightedSiteLayer) { map.removeLayer(highlightedSiteLayer); }
         var filteredFeatures = json_Lemo_AR_1.features.filter(function(feature) {
@@ -505,7 +524,7 @@
           map.fitBounds(highlightedSiteLayer.getBounds());
         }
       } 
-      //////// Else if a Kebele is selected (but no Site), highlight with a yellow boundary
+      /////////// Else if a Kebele is selected (but no Site), highlight with a yellow boundary
       else if (selectedKebele) {
         if (highlightedSiteLayer) { map.removeLayer(highlightedSiteLayer); }
         var filteredFeatures = json_Lemo_AR_1.features.filter(function(feature) {
@@ -516,7 +535,7 @@
             return L.geoJson(feature, {
               style: function() {
                 return {
-                  color: 'yellow',   ////// Yellow boundary for Kebele
+                  color: 'yellow',   // Yellow boundary for Kebele
                   weight: 4
                 };
               },
@@ -535,7 +554,7 @@
           map.fitBounds(highlightedSiteLayer.getBounds());
         }
       } 
-      //////// Else if only a Woreda is selected (and no Kebele), highlight with a green boundary.
+      /////////// Else if only a Woreda is selected (and no Kebele), highlight with a green boundary.
       else if (selectedWoreda) {
         if (highlightedSiteLayer) { map.removeLayer(highlightedSiteLayer); }
         var filteredFeatures = json_Lemo_AR_1.features.filter(function(feature) {
@@ -565,7 +584,7 @@
           map.fitBounds(highlightedSiteLayer.getBounds());
         }
       } 
-      //////// Else if only a Region is selected, highlight with a black boundary.
+      /////// Else if only a Region is selected, highlight with a black boundary.
       else if (selectedRegion) {
         if (highlightedSiteLayer) { map.removeLayer(highlightedSiteLayer); }
         var filteredFeatures = json_Lemo_AR_1.features.filter(function(feature) {
@@ -595,7 +614,7 @@
           map.fitBounds(highlightedSiteLayer.getBounds());
         }
       } 
-      //////// Otherwise, if no specific selection, zoom to filtered features if any filters are applied.
+      /////////// Otherwise, if no specific selection, zoom to filtered features if any filters are applied.
       else {
         var filters = {};
         if (selectedRegion) { filters.Region = selectedRegion; }
