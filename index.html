@@ -7,6 +7,18 @@
   <title>Ethiopian Afforestation-Reforestation (AR) Project Sites</title>
   <link rel="stylesheet" href="css/leaflet.css">
   <style>
+    /* Logo style */
+    .logo-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1500;
+      padding: 5px;
+    }
+    .logo-container img {
+      height: 40px;
+      width: auto;
+    }
     html, body, #map {
       width: 100%;
       height: 100%;
@@ -26,18 +38,126 @@
       top: 0;
       z-index: 1000;
     }
-    /* Position the Navigation & Download panels together side by side */
-    .side-panel {
+    /* Burger Menu Container using extra horizontal padding */
+    .burger-container {
       position: fixed;
-      top: 60px; /* adjusted to exactly so that it touches the header or title background */
-      left: 0;  /* 0 meanse, just following the screen edge */
+      top: 62px; /* just right below header */
+      left: 0;
+      width: 100%;
+      background-color: green;
+      z-index: 1100;
+      height: 36px; /* adjusted for thinner or broader widtth */
       display: flex;
-      flex-direction: row;
-      gap: 0;  /* removed gap so panels share the same border line-meanse no space in between the panels */
-      align-items: flex-start; /* Ensure panels have independent heights */
-      z-index: 1000;
+      align-items: center;
+      padding: 0 20px;  /* extra padding - so not flush with the edge */
     }
-    /* Fix the widths so each panel appears properly */
+    /* Left–side elements (hamburgerr and Menu texts) */
+    .hamburger {
+      cursor: pointer;
+      width: 31px;
+      height: 25px;
+    }
+    .hamburger span {
+      display: block;
+      height: 3px;
+      margin: 4px 0;
+      background: #000;
+      border-radius: 2px;
+    }
+    #menu-text {
+      color: white;
+      background: none;
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 25px;
+      margin-left: 10px;
+    }
+    /* Container for information panel buttons – aligned to the right with extra margin to the right */
+    .menu-buttons {
+      margin-left: auto;
+      margin-right: 30px;  /* extra space from the right edge - also adjust after checking */
+      display: flex;
+      gap: 40px;
+    }
+    /* Information panel buttons - styling */
+    .about-button,
+    .metadata-button,
+    .redd-button,
+    .reports-button,
+    .team-button {
+      background-color: #fff;
+      color: #000;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+    /* Information Panels – fixed width for most panels */
+    .about-panel,
+    .metadata-panel,
+    .redd-panel,
+    .reports-panel {
+      display: none;
+      position: fixed;
+      width: 300px;
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 15px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      z-index: 1200;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+    }
+        /* Team panel, reduce or make the dimension */
+    .team-panel {
+      display: none;
+      position: fixed;
+      width: 250px;  /* reduce width when neccessary */
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 10px; /* reduced padding when neccessaryy  */
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      z-index: 1200;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      overflow-x: auto;
+    }
+    /* Team list style */
+    .team-panel ul {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+    }
+    .team-panel li {
+      margin-bottom: 10px;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 5px;
+      cursor: pointer;
+    }
+    .team-name, 
+    .team-details p {
+      white-space: nowrap;
+      margin: 2px 0;
+    }
+    /* Initially or on first click on the menu, only the team name is visible- details are hidden */
+    .team-details {
+      display: none;
+    }
+    /* Navigation (Nviagte to AR Site) and Download Panels - Side by side on the left corner */
+    .nav-download-container {
+      position: fixed;
+      top: 62px; /* right below the header or title backround */
+      left: 0px; /* adjusted to align with the burger menu container */
+      z-index: 1100;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    /* Navigation Panel */
     .selection-panels {
       background: white;
       border-radius: 5px;
@@ -45,22 +165,30 @@
       font-family: Arial, sans-serif;
       font-size: 14px;
       width: 240px;
-      overflow: hidden;
-      margin-bottom: 10px;
+      overflow: visible;
+      position: relative;
     }
     .nav-header {
-      background-color: green;
+     background-color: grey;
       color: white;
-      padding: 10px;
       font-weight: bold;
+      padding: 8px 10px;
+      border-radius: 4px;
       cursor: pointer;
-      text-align: center;
-      border-bottom: 1px solid #ddd;
-      font-size: 16px; /* Adjusted to match Download AR Datasets-same font sizee */
+      font-size: 14px;
+      font-weight: bold;
+      flex-shrink: 0;
     }
     .nav-content {
       display: none;
       padding: 10px;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      width: 240px;
+      background: white;
+      border-radius: 5px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.3);
     }
     .nav-content .panel {
       margin-bottom: 10px;
@@ -79,13 +207,13 @@
       padding: 5px;
       font-size: 14px;
       cursor: pointer;
-      background-color: #add8e6; /* Light blue-possible to chang */
+      background-color: #add8e6;
       color: black;
       border: none;
       border-radius: 4px;
       margin-bottom: 5px;
     }
-    /* Download Container styling */
+    /* Download Panel */
     .download-container {
       background: white;
       border-radius: 5px;
@@ -94,51 +222,62 @@
       font-size: 14px;
       text-align: center;
       width: 240px;
-      /* Removed padding so the background matches exactly the header extent */
+      position: relative;
     }
     .download-header {
-      cursor: pointer;
-      background-color: orange;
+      background-color: grey;
       color: white;
-      padding: 10px;
       font-weight: bold;
-      text-align: center;
-      border-bottom: 1px solid #ddd;
-      font-size: 16px; /* Adjusted to match Navigate to AR Sites -same font size */  
+      padding: 8px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+      flex-shrink: 0;
     }
     .download-list {
       list-style-type: none;
       padding: 0;
       margin: 0;
       display: none;
+      position: absolute;
+      left: 0;
+      top: 100%;
+      width: 100%;
+      background: white;
+      border-radius: 5px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.3);
+      white-space: nowrap;
     }
     .download-list li {
-      margin: 5px 0;
+      margin: 2px 0;
       cursor: pointer;
       padding: 8px 10px;
       background-color: lightblue;
       color: white;
-      border-radius: 4px;
-      text-align: center;
+      border-radius: 0px;
+      text-align: left;
+      white-space: nowrap;
     }
     .download-list li:hover {
       background-color: #e68900;
     }
+    /* Adjusted map margin-top */
     #map {
-      margin-top: 60px;
+      margin-top: 90px;
     }
-    /* Contacts Panel styling */
+    /* Contacts Panel styli */
     .contact-container {
       position: fixed;
       bottom: 30px;
       right: 1px;
-      width: 208px;
+      width: 200px;
       z-index: 1000;
       background: white;
       border-radius: 5px;
       box-shadow: 0 0 5px rgba(0,0,0,0.3);
       font-family: Arial, sans-serif;
-      font-size: 12px;
+      font-size: 11px;
       overflow: hidden;
       margin-top: 10px;
     }
@@ -159,7 +298,7 @@
     .contact-content p {
       margin: 5px 0;
     }
-    /* Footer style - extended to full screen */
+    /* Footer stylee */
     .footer {
       background-color: #0078A8;
       padding: 15px 20px;
@@ -171,28 +310,52 @@
       bottom: 0;
       z-index: 1000;
     }
-    /* Fix the Leaflet controls (zoom and layers control) so they remain static - on scrolling of the screen */
+    /* Leaflet controls - zoom in and out and base map control layers */
     .leaflet-control-zoom,
     .leaflet-control-layers {
       position: fixed !important;
       z-index: 1100;
     }
     .leaflet-control-zoom {
-      top: 150px !important;
+      top: 120px !important;
       right: 10px !important;
     }
     .leaflet-control-layers {
-      top: 150px !important;
+      top: 120px !important;
       right: 50px !important;
+    }
+    /* Pointer cursor for team items */
+    .team-panel li {
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
+  <div class="logo-container">
+    <img src="assets/logo.PNG" alt="Logo">
+  </div>
   <div class="header">Ethiopian Afforestation-Reforestation (AR) Project Sites</div>
-  <div id="map"></div>
   
-  <!-- Side Panel: Navigation & Download (side by side) -->
-  <div class="side-panel">
+  <!-- -Burger menu Container with left side elements and right aligned menu buttons -->
+  <div class="burger-container">
+    <div class="hamburger" id="menu-toggle">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+    <div id="menu-text">Menu</div>
+    <div class="menu-buttons">
+      <!-- Order, can be adjusted after discussion with clients, also additonal information panel lists can be added or removed: About, Metadata, REDD+, Reports and Publications, Team -->
+      <div class="about-button" id="about-toggle">About</div>
+      <div class="metadata-button" id="metadata-toggle">Metadata</div>
+      <div class="redd-button" id="redd-toggle">REDD+</div>
+      <div class="reports-button" id="reports-toggle">Reports and Publications</div>
+      <div class="team-button" id="team-toggle">Team</div>
+    </div>
+  </div>
+  
+  <!-- -Navigation and Download Panels - Side by side on the left corner -->
+  <div class="nav-download-container">
     <!-- Navigation Panel -->
     <div class="selection-panels">
       <div class="nav-header" id="nav-header">Navigate to AR Sites</div>
@@ -227,7 +390,7 @@
         </div>
       </div>
     </div>
-    <!-- Download Section -->
+    <!-- Download Panel -->
     <div class="download-container">
       <div class="download-header" id="download-header">Download AR Datasets</div>
       <ul class="download-list" id="download-list">
@@ -237,6 +400,8 @@
       </ul>
     </div>
   </div>
+  
+  <div id="map"></div>
   
   <!-- Contacts Panel -->
   <div class="contact-container">
@@ -249,57 +414,125 @@
     </div>
   </div>
   
+  <!-- Info Panels (positioned dynamically below each button) -->
+  <div class="about-panel" id="about-panel">
+    <h3>About</h3>
+    <p>The datasets provide detailed information on the Ethiopian Afforestation-Reforestation (AR) Project Sites. Explore the interactive map to view project site boundaries, attributes, download various datasets, and learn more about the project. Our goal is to offer transparent and accessible data for monitoring strategies, .........................................
+    ...................................................</p>
+  </div>
+
+  <div class="metadata-panel" id="metadata-panel">
+    <h3>Metadata</h3>
+    <p>Detailed information on the structure of datasets, data formats, software, abbreviations ...................................................
+    ..................................</p>
+  </div>
+  
+  <div class="redd-panel" id="redd-panel">
+    <h3>REDD+</h3>
+    <p>This section contains information on REDD+ and AR projects..................................................
+    ..........................................</p>
+  </div>
+  
+  <div class="reports-panel" id="reports-panel">
+    <h3>Reports and Publications</h3>
+    <p>Reports, research, and publications:</p>
+    <ul>
+      <li><a href="https://example.com/report1" target="_blank">Title/Reference</a></li>
+      <li><a href="https://example.com/report2" target="_blank">Title/Reference</a></li>
+      <li><a href="https://example.com/publication1" target="_blank">Title/Reference</a></li>
+    </ul>
+  </div>
+  
+  <div class="team-panel" id="team-panel">
+    <h3>Team</h3>
+    <ul>
+      <li id="team-item-xxx">
+        <p class="team-name">Name: XXX</p>
+        <div class="team-details" id="team-details-xxx">
+          <p>Contact: AAA BBB</p>
+          <p>Email: aa@aa.com</p>
+          <p>Phone: 000-000-000</p>
+        </div>
+      </li>
+      <li id="team-item-yyy">
+        <p class="team-name">Name: YYY</p>
+        <div class="team-details" id="team-details-yyy">
+          <p>Contact: CCC DDD</p>
+          <p>Email: aaa@bbb.com</p>
+          <p>Phone: 0000-000-00</p>
+        </div>
+      </li>
+      <li id="team-item-zzz">
+        <p class="team-name">Name: ZZZ</p>
+        <div class="team-details" id="team-details-zzz">
+          <p>Contact: EEE FFFF</p>
+          <p>Email: eee@eeee.com</p>
+          <p>Phone: 0000-0000-000000</p>
+        </div>
+      </li>
+    </ul>
+  </div>
+  
   <!-- Footer -->
   <div class="footer"></div>
   
   <script src="js/leaflet.js"></script>
   <script src="data/Lemo_AR_1.js"></script>
   <script>
-    //////// Initialize Map
+   
+    // //////Helper function to hide all info panels
+    function hideAllPanels() {
+      document.getElementById('about-panel').style.display = 'none';
+      document.getElementById('metadata-panel').style.display = 'none';
+      document.getElementById('redd-panel').style.display = 'none';
+      document.getElementById('reports-panel').style.display = 'none';
+      document.getElementById('team-panel').style.display = 'none';
+    }
+    //////// /Initialize Map
     var map = L.map('map', { zoomControl: true }).setView([7.5, 37.9], 10);
-
-    ///////////// Add multiple basemaps - 
+    
+    
+    ///////////// Add multiple basemaps
     var googleSatellite = L.tileLayer('https://{s}.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}', {
       subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
       attribution: '&copy; Google Maps'
     });
-
     var googleStreets = L.tileLayer('https://{s}.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}', {
       subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
       attribution: '&copy; Google Maps'
     });
-
     var openStreetMap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors'
     });
-
-    // Add Global NDVI Base Map (NASA GIBS)
+    // Global NDVI Base Map (NASA GIBS)
     var globalNDVI = L.tileLayer('https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_NDVI_16Day/default/{time}/{tileMatrixSet}/{z}/{y}/{x}.jpg', {
       tileMatrixSet: 'GoogleMapsCompatible_Level8',
-      time: '2023-10-01', // Update this to the latest available date
+      time: '2023-10-01',
       attribution: '&copy; NASA GIBS',
       maxZoom: 8,
-      opacity: 0.7 // Adjust opacity as needed
+      opacity: 0.7
     });
-
-    ////// Add Google Satellite as default base map
+    ////// //Add Google Satellite as default base map
     googleSatellite.addTo(map);
-
-    /////////// Create Layer Control for Base Maps
+    // Create Layer Control for Base Maps
     var baseMaps = {
       "Google Satellite": googleSatellite,
       "Google Streets": googleStreets,
       "OpenStreetMap": openStreetMap,
-      "Global NDVI": globalNDVI // Add NDVI to the base maps
+      "Global NDVI": globalNDVI
     };
-
-    //////// Add Layer Control to Map
     L.control.layers(baseMaps).addTo(map);
-
-    ////////// Global variable to hold the highlighted layer (for selected feature)
+    
+    
+    /// Global variable to hold the highlighted layer (for selected feature)
     var highlightedSiteLayer;
-
-    // Load GeoJSON Layer with popups bound to each polygon
+    
+    //// Helper function to hide both fly-out panels (for igation and download)
+    function hideFlyouts() {
+      document.getElementById('nav-content').style.display = 'none';
+      document.getElementById('download-list').style.display = 'none';
+    }
+    ///// Load GeoJSON Layer with popups bound to each polygon
     var geojsonLayer = L.geoJson(json_Lemo_AR_1, {
       onEachFeature: function (feature, layer) {
         if (feature.properties) {
@@ -313,49 +546,60 @@
         }
       }
     }).addTo(map);
-
-    /////////// Toggle the download list visibility when the download header is clicked
-    document.getElementById('download-header').addEventListener('click', function() {
+    
+    //// Toggle the download list visibility when the download header is clicked
+    document.getElementById('download-header').addEventListener('click', function(e) {
+      e.stopPropagation();
       var downloadList = document.getElementById('download-list');
-      if (downloadList.style.display === 'none' || downloadList.style.display === '') {
-        downloadList.style.display = 'block';
-      } else {
+      if (downloadList.style.display === 'block') {
         downloadList.style.display = 'none';
+      } else {
+        hideFlyouts();
+        hideAllPanels();
+        downloadList.style.display = 'block';
       }
     });
-
-    //////////// Handle download events from the download list
-    document.getElementById('download-shapefile').addEventListener('click', function() {
+    
+    // /Handle download events from the download list
+    document.getElementById('download-shapefile').addEventListener('click', function(e) {
+      e.stopPropagation();
       var link = document.createElement('a');
       link.href = 'data/Lemo_AR.zip';
       link.download = 'Lemo_AR.zip';
       link.click();
     });
-    document.getElementById('download-csv').addEventListener('click', function() {
+    document.getElementById('download-csv').addEventListener('click', function(e) {
+      e.stopPropagation();
       var link = document.createElement('a');
       link.href = 'data/Lemo_AR.csv';
       link.download = 'Lemo_AR.csv';
       link.click();
     });
-    document.getElementById('download-metadata').addEventListener('click', function() {
+    document.getElementById('download-metadata').addEventListener('click', function(e) {
+      e.stopPropagation();
       var link = document.createElement('a');
       link.href = 'data/Lemo_AR_Metadata.docx';
       link.download = 'Lemo_AR_Metadata.docx';
       link.click();
     });
-
-    ///// Toggle the navigation panel content when the navig header is clicked
-    document.getElementById('nav-header').addEventListener('click', function() {
+    
+    //// Toggle the navigation panel content when the nav header is clicked
+    document.getElementById('nav-header').addEventListener('click', function(e) {
+      e.stopPropagation();
       var navContent = document.getElementById('nav-content');
-      if (navContent.style.display === 'none' || navContent.style.display === '') {
-        navContent.style.display = 'block';
-      } else {
+      if (navContent.style.display === 'block') {
         navContent.style.display = 'none';
+      } else {
+        hideFlyouts();
+        hideAllPanels();
+        navContent.style.display = 'block';
       }
     });
-
+    
     /// Toggle the contacts panel content when the contact header is clicked
-    document.getElementById('contact-header').addEventListener('click', function() {
+    document.getElementById('contact-header').addEventListener('click', function(e) {
+      e.stopPropagation();
+      hideAllPanels();
       var contactContent = document.getElementById('contact-content');
       if (contactContent.style.display === 'none' || contactContent.style.display === '') {
         contactContent.style.display = 'block';
@@ -363,16 +607,14 @@
         contactContent.style.display = 'none';
       }
     });
-
-    ////// Functions for Dynamic Selections
+    
+    // //Functions for Dynamic Selections
     function populateRegion() {
       var selectRegion = document.getElementById('select-region');
       selectRegion.innerHTML = '<option value="">--Select--</option>';
       var regionSet = new Set();
       json_Lemo_AR_1.features.forEach(function(feature) {
-        if (feature.properties.Region) {
-          regionSet.add(feature.properties.Region);
-        }
+        if (feature.properties.Region) { regionSet.add(feature.properties.Region); }
       });
       var regionList = Array.from(regionSet).sort();
       regionList.forEach(function(region) {
@@ -382,16 +624,13 @@
         selectRegion.appendChild(option);
       });
     }
-
     function populateWoreda(selectedRegion) {
       var selectWoreda = document.getElementById('select-woreda');
       selectWoreda.innerHTML = '<option value="">--Select--</option>';
       var woredaSet = new Set();
       json_Lemo_AR_1.features.forEach(function(feature) {
         if (selectedRegion && feature.properties.Region !== selectedRegion) return;
-        if (feature.properties.Woreda) {
-          woredaSet.add(feature.properties.Woreda);
-        }
+        if (feature.properties.Woreda) { woredaSet.add(feature.properties.Woreda); }
       });
       var woredaList = Array.from(woredaSet).sort();
       woredaList.forEach(function(woreda) {
@@ -401,7 +640,6 @@
         selectWoreda.appendChild(option);
       });
     }
-
     function populateKebele(selectedRegion, selectedWoreda) {
       var selectKebele = document.getElementById('select-kebele');
       selectKebele.innerHTML = '<option value="">--Select--</option>';
@@ -409,9 +647,7 @@
       json_Lemo_AR_1.features.forEach(function(feature) {
         if (selectedRegion && feature.properties.Region !== selectedRegion) return;
         if (selectedWoreda && feature.properties.Woreda !== selectedWoreda) return;
-        if (feature.properties.Kebele) {
-          kebeleSet.add(feature.properties.Kebele);
-        }
+        if (feature.properties.Kebele) { kebeleSet.add(feature.properties.Kebele); }
       });
       var kebeleList = Array.from(kebeleSet).sort();
       kebeleList.forEach(function(kebele) {
@@ -421,7 +657,6 @@
         selectKebele.appendChild(option);
       });
     }
-
     function populateSite(selectedRegion, selectedWoreda, selectedKebele) {
       var selectSite = document.getElementById('select-site');
       selectSite.innerHTML = '<option value="">--Select--</option>';
@@ -430,9 +665,7 @@
         if (selectedRegion && feature.properties.Region !== selectedRegion) return;
         if (selectedWoreda && feature.properties.Woreda !== selectedWoreda) return;
         if (selectedKebele && feature.properties.Kebele !== selectedKebele) return;
-        if (feature.properties.Site_Name) {
-          siteSet.add(feature.properties.Site_Name);
-        }
+        if (feature.properties.Site_Name) { siteSet.add(feature.properties.Site_Name); }
       });
       var siteList = Array.from(siteSet).sort();
       siteList.forEach(function(site) {
@@ -442,73 +675,59 @@
         selectSite.appendChild(option);
       });
     }
-
     function zoomToFiltered(filters) {
       var filteredFeatures = json_Lemo_AR_1.features.filter(function(feature) {
         for (var key in filters) {
-          if (filters[key] && feature.properties[key] !== filters[key]) {
-            return false;
-          }
+          if (filters[key] && feature.properties[key] !== filters[key]) { return false; }
         }
         return true;
       });
       if (filteredFeatures.length > 0) {
-        var layers = filteredFeatures.map(function(feature) {
-          return L.geoJson(feature);
-        });
+        var layers = filteredFeatures.map(function(feature) { return L.geoJson(feature); });
         var group = L.featureGroup(layers);
         map.fitBounds(group.getBounds());
       }
     }
-
-    /////////////////// Initialize dropdowns
+    
+    // /Initialize dropdowns
     populateRegion();
     populateWoreda('');
     populateKebele('', '');
     populateSite('', '', '');
-
-    document.getElementById('select-region').addEventListener('change', function() {
+    document.getElementById('select-region').addEventListener('change', function(e) {
+      e.stopPropagation();
       var selectedRegion = this.value;
       populateWoreda(selectedRegion);
       populateKebele(selectedRegion, '');
       populateSite(selectedRegion, '', '');
     });
-
-    document.getElementById('select-woreda').addEventListener('change', function() {
+    document.getElementById('select-woreda').addEventListener('change', function(e) {
+      e.stopPropagation();
       var selectedRegion = document.getElementById('select-region').value;
       var selectedWoreda = this.value;
       populateKebele(selectedRegion, selectedWoreda);
       populateSite(selectedRegion, selectedWoreda, '');
     });
-
-    document.getElementById('select-kebele').addEventListener('change', function() {
+    document.getElementById('select-kebele').addEventListener('change', function(e) {
+      e.stopPropagation();
       var selectedRegion = document.getElementById('select-region').value;
       var selectedWoreda = document.getElementById('select-woreda').value;
       var selectedKebele = this.value;
       populateSite(selectedRegion, selectedWoreda, selectedKebele);
     });
-
-    document.getElementById('btn-display').addEventListener('click', function() {
+    document.getElementById('btn-display').addEventListener('click', function(e) {
+      e.stopPropagation();
       var selectedRegion = document.getElementById('select-region').value;
       var selectedWoreda = document.getElementById('select-woreda').value;
       var selectedKebele = document.getElementById('select-kebele').value;
       var selectedSite = document.getElementById('select-site').value;
-
-      ////////// If a Site is selected, highlight with a red boundary.
       if (selectedSite) {
         if (highlightedSiteLayer) { map.removeLayer(highlightedSiteLayer); }
-        var filteredFeatures = json_Lemo_AR_1.features.filter(function(feature) {
-          return feature.properties.Site_Name === selectedSite;
-        });
+        var filteredFeatures = json_Lemo_AR_1.features.filter(function(feature) { return feature.properties.Site_Name === selectedSite; });
         if (filteredFeatures.length > 0) {
           var layers = filteredFeatures.map(function(feature) {
             return L.geoJson(feature, {
-              style: function() {
-                return {
-                  color: 'red',      // Red boundary for Site
-                  weight: 4
-                };
-              },
+              style: function() { return { color: 'red', weight: 4 }; },
               onEachFeature: function(feature, layer) {
                 var popupContent = "<b>Attributes:</b><br>";
                 for (var key in feature.properties) {
@@ -523,22 +742,13 @@
           highlightedSiteLayer = L.featureGroup(layers).addTo(map);
           map.fitBounds(highlightedSiteLayer.getBounds());
         }
-      } 
-      /////////// Else if a Kebele is selected (but no Site), highlight with a yellow boundary
-      else if (selectedKebele) {
+      } else if (selectedKebele) {
         if (highlightedSiteLayer) { map.removeLayer(highlightedSiteLayer); }
-        var filteredFeatures = json_Lemo_AR_1.features.filter(function(feature) {
-          return feature.properties.Kebele === selectedKebele;
-        });
+        var filteredFeatures = json_Lemo_AR_1.features.filter(function(feature) { return feature.properties.Kebele === selectedKebele; });
         if (filteredFeatures.length > 0) {
           var layers = filteredFeatures.map(function(feature) {
             return L.geoJson(feature, {
-              style: function() {
-                return {
-                  color: 'yellow',   // Yellow boundary for Kebele
-                  weight: 4
-                };
-              },
+              style: function() { return { color: 'yellow', weight: 4 }; },
               onEachFeature: function(feature, layer) {
                 var popupContent = "<b>Attributes:</b><br>";
                 for (var key in feature.properties) {
@@ -553,22 +763,13 @@
           highlightedSiteLayer = L.featureGroup(layers).addTo(map);
           map.fitBounds(highlightedSiteLayer.getBounds());
         }
-      } 
-      /////////// Else if only a Woreda is selected (and no Kebele), highlight with a green boundary.
-      else if (selectedWoreda) {
+      } else if (selectedWoreda) {
         if (highlightedSiteLayer) { map.removeLayer(highlightedSiteLayer); }
-        var filteredFeatures = json_Lemo_AR_1.features.filter(function(feature) {
-          return feature.properties.Woreda === selectedWoreda;
-        });
+        var filteredFeatures = json_Lemo_AR_1.features.filter(function(feature) { return feature.properties.Woreda === selectedWoreda; });
         if (filteredFeatures.length > 0) {
           var layers = filteredFeatures.map(function(feature) {
             return L.geoJson(feature, {
-              style: function() {
-                return {
-                  color: 'green',    // Green boundary for Woreda
-                  weight: 4
-                };
-              },
+              style: function() { return { color: 'green', weight: 4 }; },
               onEachFeature: function(feature, layer) {
                 var popupContent = "<b>Attributes:</b><br>";
                 for (var key in feature.properties) {
@@ -583,22 +784,13 @@
           highlightedSiteLayer = L.featureGroup(layers).addTo(map);
           map.fitBounds(highlightedSiteLayer.getBounds());
         }
-      } 
-      /////// Else if only a Region is selected, highlight with a black boundary.
-      else if (selectedRegion) {
+      } else if (selectedRegion) {
         if (highlightedSiteLayer) { map.removeLayer(highlightedSiteLayer); }
-        var filteredFeatures = json_Lemo_AR_1.features.filter(function(feature) {
-          return feature.properties.Region === selectedRegion;
-        });
+        var filteredFeatures = json_Lemo_AR_1.features.filter(function(feature) { return feature.properties.Region === selectedRegion; });
         if (filteredFeatures.length > 0) {
           var layers = filteredFeatures.map(function(feature) {
             return L.geoJson(feature, {
-              style: function() {
-                return {
-                  color: 'black',    // Black boundary for Region
-                  weight: 4
-                };
-              },
+              style: function() { return { color: 'black', weight: 4 }; },
               onEachFeature: function(feature, layer) {
                 var popupContent = "<b>Attributes:</b><br>";
                 for (var key in feature.properties) {
@@ -613,54 +805,33 @@
           highlightedSiteLayer = L.featureGroup(layers).addTo(map);
           map.fitBounds(highlightedSiteLayer.getBounds());
         }
-      } 
-      /////////// Otherwise, if no specific selection, zoom to filtered features if any filters are applied.
-      else {
+      } else {
         var filters = {};
         if (selectedRegion) { filters.Region = selectedRegion; }
         if (selectedWoreda) { filters.Woreda = selectedWoreda; }
         if (selectedKebele) { filters.Kebele = selectedKebele; }
-        if (Object.keys(filters).length > 0) {
-          zoomToFiltered(filters);
-        }
+        if (Object.keys(filters).length > 0) { zoomToFiltered(filters); }
       }
     });
-
-    document.getElementById('btn-download').addEventListener('click', function() {
+    document.getElementById('btn-download').addEventListener('click', function(e) {
+      e.stopPropagation();
       var selectedRegion = document.getElementById('select-region').value;
       var selectedWoreda = document.getElementById('select-woreda').value;
       var selectedKebele = document.getElementById('select-kebele').value;
       var selectedSite = document.getElementById('select-site').value;
       var filters = {};
       var filename = "all_features";
-      if (selectedRegion) {
-        filters.Region = selectedRegion;
-        filename = selectedRegion;
-      }
-      if (selectedWoreda) {
-        filters.Woreda = selectedWoreda;
-        filename += "_" + selectedWoreda;
-      }
-      if (selectedKebele) {
-        filters.Kebele = selectedKebele;
-        filename += "_" + selectedKebele;
-      }
-      if (selectedSite) {
-        filters.Site_Name = selectedSite;
-        filename += "_" + selectedSite;
-      }
+      if (selectedRegion) { filters.Region = selectedRegion; filename = selectedRegion; }
+      if (selectedWoreda) { filters.Woreda = selectedWoreda; filename += "_" + selectedWoreda; }
+      if (selectedKebele) { filters.Kebele = selectedKebele; filename += "_" + selectedKebele; }
+      if (selectedSite) { filters.Site_Name = selectedSite; filename += "_" + selectedSite; }
       var filteredFeatures = json_Lemo_AR_1.features.filter(function(feature) {
         for (var key in filters) {
-          if (filters[key] && feature.properties[key] !== filters[key]) {
-            return false;
-          }
+          if (filters[key] && feature.properties[key] !== filters[key]) { return false; }
         }
         return true;
       });
-      var geojson = {
-        type: "FeatureCollection",
-        features: filteredFeatures
-      };
+      var geojson = { type: "FeatureCollection", features: filteredFeatures };
       var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(geojson));
       var downloadAnchorNode = document.createElement('a');
       downloadAnchorNode.setAttribute("href", dataStr);
@@ -668,6 +839,113 @@
       document.body.appendChild(downloadAnchorNode);
       downloadAnchorNode.click();
       downloadAnchorNode.remove();
+    });
+    
+    //// Toggle Side Panel visibility when hamburger menu or "Menu" text is clicked
+    document.getElementById('menu-toggle').addEventListener('click', function(e) {
+      e.stopPropagation();
+      hideFlyouts();
+      hideAllPanels();
+      var sidePanel = document.querySelector('.side-panel');
+      sidePanel.style.display = (sidePanel.style.display === 'none' || sidePanel.style.display === '') ? 'flex' : 'none';
+    });
+    document.getElementById('menu-text').addEventListener('click', function(e) {
+      e.stopPropagation();
+      hideFlyouts();
+      hideAllPanels();
+      var sidePanel = document.querySelector('.side-panel');
+      sidePanel.style.display = (sidePanel.style.display === 'none' || sidePanel.style.display === '') ? 'flex' : 'none';
+    });
+    
+    
+    /// For each info button, position its panel so that its right edge aligns with the button's right edge (extending to the left).
+    // For the Team panel, override the positioning to align flush with the right edge of the screen with a 20px gap.
+    function togglePanel(buttonId, panelId) {
+      var button = document.getElementById(buttonId);
+      var panel = document.getElementById(panelId);
+      if (panel.style.display === 'block') {
+        panel.style.display = 'none';
+      } else {
+        hideAllPanels();
+        if (panelId === 'team-panel') {
+          panel.style.display = 'block';
+          var panelWidth = panel.offsetWidth;
+          panel.style.top = (button.getBoundingClientRect().bottom + 5) + "px";
+          
+          /// Adjust margin here: 20px gap from the right edge
+          panel.style.left = (window.innerWidth - panelWidth - 20) + "px";
+        } else {
+          var rect = button.getBoundingClientRect();
+          panel.style.top = (rect.bottom + 5) + "px";
+          panel.style.left = (rect.right - 300) + "px"; // 300px fixed width for other panels
+          panel.style.display = 'block';
+        }
+      }
+    }
+    document.getElementById('about-toggle').addEventListener('click', function(e) {
+      e.stopPropagation();
+      togglePanel('about-toggle', 'about-panel');
+    });
+    document.getElementById('metadata-toggle').addEventListener('click', function(e) {
+      e.stopPropagation();
+      togglePanel('metadata-toggle', 'metadata-panel');
+    });
+    document.getElementById('redd-toggle').addEventListener('click', function(e) {
+      e.stopPropagation();
+      togglePanel('redd-toggle', 'redd-panel');
+    });
+    document.getElementById('reports-toggle').addEventListener('click', function(e) {
+      e.stopPropagation();
+      togglePanel('reports-toggle', 'reports-panel');
+    });
+    document.getElementById('team-toggle').addEventListener('click', function(e) {
+      e.stopPropagation();
+      togglePanel('team-toggle', 'team-panel');
+    });
+    
+    
+    /// Global click listenerr to hide panels when clicking outside their toggle buttons and panels.
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('#about-toggle') && !e.target.closest('#about-panel')) {
+        document.getElementById('about-panel').style.display = 'none';
+      }
+      if (!e.target.closest('#metadata-toggle') && !e.target.closest('#metadata-panel')) {
+        document.getElementById('metadata-panel').style.display = 'none';
+      }
+      if (!e.target.closest('#redd-toggle') && !e.target.closest('#redd-panel')) {
+        document.getElementById('redd-panel').style.display = 'none';
+      }
+      if (!e.target.closest('#reports-toggle') && !e.target.closest('#reports-panel')) {
+        document.getElementById('reports-panel').style.display = 'none';
+      }
+      if (!e.target.closest('#team-toggle') && !e.target.closest('#team-panel')) {
+        document.getElementById('team-panel').style.display = 'none';
+      }
+      if (
+        !e.target.closest('.nav-header') &&
+        !e.target.closest('.nav-content') &&
+        !e.target.closest('.download-header') &&
+        !e.target.closest('.download-list')
+      ) {
+        hideFlyouts();
+      }
+    });
+    
+    // //Event listeners for each Team item to toggle detailed information.
+    document.getElementById('team-item-xxx').addEventListener('click', function(e) {
+      e.stopPropagation();
+      var details = document.getElementById('team-details-xxx');
+      details.style.display = (details.style.display === 'none' || details.style.display === '') ? 'block' : 'none';
+    });
+    document.getElementById('team-item-yyy').addEventListener('click', function(e) {
+      e.stopPropagation();
+      var details = document.getElementById('team-details-yyy');
+      details.style.display = (details.style.display === 'none' || details.style.display === '') ? 'block' : 'none';
+    });
+    document.getElementById('team-item-zzz').addEventListener('click', function(e) {
+      e.stopPropagation();
+      var details = document.getElementById('team-details-zzz');
+      details.style.display = (details.style.display === 'none' || details.style.display === '') ? 'block' : 'none';
     });
   </script>
 </body>
